@@ -15,13 +15,14 @@ WIN_PROHIBITED_SYMBOLS = {'/', '\\', ':', '*', '?', '"', '<', '>', '|'}
 WIN_PROHIBITED_NAMES = ['CON', 'PRN', 'AUX', 'CLOCK$', 'NUL',
                         'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
                         'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9']
+
 WIN_FILENAME_LENGTH_LIMIT_SYMBOLS = 255
 EXT_FILENAME_LENGTH_LIMIT_BYTES = 255
 EXT_ENCRYPTED_FILENAME_LENGTH_LIMIT_BYTES = 143
+
 EXFAT_FULL_PATH_LIMIT_SYMBOLS = 32760
 NTFS_FULL_PATH_LIMIT_SYMBOLS = 32767
 EXT_ENCRYPTED_FULL_PATH_LIMIT_SYMBOLS = 4095
-
 
 def _get_vars_from_kwargs(**kwargs) -> Tuple[str]:
     filename = kwargs['filename']
@@ -153,13 +154,14 @@ def check_all(directory: str, filesystems: list[str] = FILESYSTEMS_SUPPORTED, si
     path, dirname = os.path.split(directory)
     print_results(*_walk_directory(path, dirname, []))
 
-def main():
+def run():
     parser = argparse.ArgumentParser(prog='dir_compat',
                                      description='Directory compatibility checker, ignores symbolic links and files inaccessible due to permissions')
     parser.add_argument('-d', '--directory', help='Directory to check for compatibility', required=True)
-    parser.add_argument('-f', '--filesystems', help='Filesystems to check compatibility with', choices=FILESYSTEMS_SUPPORTED, default=FILESYSTEMS_SUPPORTED)
+    parser.add_argument('-f', '--filesystems', help='Filesystems to check compatibility with', choices=FILESYSTEMS_SUPPORTED,
+                        default=FILESYSTEMS_SUPPORTED, nargs="+")
     args = vars(parser.parse_args())
     check_all(**args)
 
 if __name__ == "__main__":
-    main()
+    run()
