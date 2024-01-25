@@ -24,6 +24,7 @@ EXFAT_FULL_PATH_LIMIT_SYMBOLS = 32760
 NTFS_FULL_PATH_LIMIT_SYMBOLS = 32767
 EXT_ENCRYPTED_FULL_PATH_LIMIT_SYMBOLS = 4095
 
+
 def _get_vars_from_kwargs(**kwargs) -> Tuple[str]:
     filename = kwargs['filename']
     path = kwargs['path']
@@ -31,6 +32,7 @@ def _get_vars_from_kwargs(**kwargs) -> Tuple[str]:
     filesystems = ', '.join(kwargs['fs'])
     siblings = kwargs['siblings']
     return filename, full_path, filesystems, siblings
+
 
 def _filename_limit(encode: bool, limit: int, **kwargs) -> str:
     filename, full_path, fs, _ = _get_vars_from_kwargs(**kwargs)
@@ -41,14 +43,18 @@ def _filename_limit(encode: bool, limit: int, **kwargs) -> str:
     if len(filename) > limit:
         return f"{full_path} filename is more than {limit} {units}, which isn't allowed on {fs}"
 
+
 def _ext_filename_limit(**kwargs) -> str:
     return _filename_limit(True, EXT_FILENAME_LENGTH_LIMIT_BYTES, **kwargs)
+
 
 def _ext_encrypted_filename_limit(**kwargs) -> str:
     return _filename_limit(True, EXT_ENCRYPTED_FILENAME_LENGTH_LIMIT_BYTES, **kwargs)
 
+
 def _windows_filename_limit(**kwargs) -> str:
     return _filename_limit(False, WIN_FILENAME_LENGTH_LIMIT_SYMBOLS, **kwargs)
+
 
 def _path_length_limit(encode: bool, limit: int, **kwargs) -> str:
     _, full_path, fs, _ = _get_vars_from_kwargs(**kwargs)
@@ -59,14 +65,18 @@ def _path_length_limit(encode: bool, limit: int, **kwargs) -> str:
     if len(full_path) > limit:
         return f"{full_path} path length is than {limit} {units}, which isn't allowed on {fs}"
 
+
 def _ext_encrypted_path_length_limit(**kwargs) -> str:
     return _path_length_limit(True, EXT_ENCRYPTED_FULL_PATH_LIMIT_SYMBOLS, **kwargs)
+
 
 def _ntfs_path_length_limit(**kwargs) -> str:
     return _path_length_limit(False, NTFS_FULL_PATH_LIMIT_SYMBOLS, **kwargs)
 
+
 def _exfat_path_length_limit(**kwargs) -> str:
     return _path_length_limit(False, EXFAT_FULL_PATH_LIMIT_SYMBOLS, **kwargs)
+
 
 def _symbols_not_allowed(prohibited_set: Set[str], **kwargs) -> str:
     filename, full_path, fs, _ = _get_vars_from_kwargs(**kwargs)
@@ -74,21 +84,26 @@ def _symbols_not_allowed(prohibited_set: Set[str], **kwargs) -> str:
     if prohibited:
         return f"{full_path} contains \"{''.join(prohibited)}\", which isn't allowed on {fs}"
 
+
 def _win_symbols_not_allowed(**kwargs) -> str:
     return _symbols_not_allowed(WIN_PROHIBITED_SYMBOLS, **kwargs)
 
+
 def _ext_symbols_not_allowed(**kwargs) -> str:
     return _symbols_not_allowed(EXT_PROHIBITED_SYMBOLS, **kwargs)
+
 
 def _win_names_not_allowed(**kwargs) -> str:
     filename, full_path, fs, _ = _get_vars_from_kwargs(**kwargs)
     if filename.upper() in WIN_PROHIBITED_NAMES:
         return f"{full_path} is a reserved name on {fs}"
 
+
 def _case_insensitive(**kwargs) -> str:
     filename, full_path, fs, siblings = _get_vars_from_kwargs(**kwargs)
     if filename.lower() in map(lambda x: x.lower(), siblings):
         return f"{full_path} has case-insensitive duplicate filenames in the same directory, which isn't allowed on {fs}"
+
 
 NTFS_AND_EXFAT_COMMON_RESTRICTIONS = [_case_insensitive, _win_names_not_allowed, _win_symbols_not_allowed,
                                       _windows_filename_limit]
@@ -100,7 +115,8 @@ RESTRICTIONS = {
     FS_EXT_ENCRYPTED: [_ext_symbols_not_allowed, _ext_encrypted_filename_limit, _ext_encrypted_path_length_limit]
 }
 
-def check_all(directory: str, filesystems: list[str] = FILESYSTEMS_SUPPORTED, silent: bool = False) -> List[str]:
+
+def check_all(directory: str, filesystems: list[str] = FILESYSTEMS_SUPPORTED) -> List[str]:
     def _get_checks():
         checks = {}
         for fs in filesystems:
@@ -154,6 +170,7 @@ def check_all(directory: str, filesystems: list[str] = FILESYSTEMS_SUPPORTED, si
     path, dirname = os.path.split(directory)
     print_results(*_walk_directory(path, dirname, []))
 
+
 def run():
     parser = argparse.ArgumentParser(prog='dir_compat',
                                      description='Directory compatibility checker, ignores symbolic links and files inaccessible due to permissions')
@@ -162,6 +179,7 @@ def run():
                         default=FILESYSTEMS_SUPPORTED, nargs="+")
     args = vars(parser.parse_args())
     check_all(**args)
+
 
 if __name__ == "__main__":
     run()

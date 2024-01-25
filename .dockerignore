@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.bak
+*.swp
+*.vscode
+*.idea
+.vscode/
+.idea/
+docker-compose.yml
+Dockerfile
+.dockerignore

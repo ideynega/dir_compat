@@ -1,1 +1,1 @@
-from .main import run
+from .main import check_all
